@@ -1,0 +1,11 @@
+{
+  "name": "hermione-ignore",
+  "version": "0.0.1",
+  "description": "Hermione plugin. Assert view with global ignored elements.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dmitry Akimov",
+  "license": "ISC"
+}
