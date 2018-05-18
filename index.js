@@ -37,7 +37,7 @@ module.exports = (hermione, opts = {}) => {
                 styleString += options.invisibleElements.join(',') + '{opacity:0}';
             }
 
-            browser
+            return browser
                 // Add styles before screenshot capturing.
                 .execute(function(styleString) {
                     var style = document.createElement('style');
