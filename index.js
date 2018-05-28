@@ -30,11 +30,11 @@ module.exports = (hermione, opts = {}) => {
             let styleString = '';
 
             if (options.hideElements.length) {
-                styleString += options.hideElements.join(',') + '{display:none}';
+                styleString += options.hideElements.join(',') + '{display:none !important}';
             }
 
             if (options.invisibleElements.length) {
-                styleString += options.invisibleElements.join(',') + '{opacity:0}';
+                styleString += options.invisibleElements.join(',') + '{opacity:0 !important}';
             }
 
             return browser
