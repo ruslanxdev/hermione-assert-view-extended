@@ -1,6 +1,6 @@
 {
   "name": "hermione-ignore",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Hermione plugin. Assert view with global ignored elements.",
   "main": "index.js",
   "scripts": {
