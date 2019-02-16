@@ -1,6 +1,6 @@
 {
   "name": "hermione-assert-view-extended",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Hermione plugin for extend assertView command.",
   "main": "index.js",
   "scripts": {
