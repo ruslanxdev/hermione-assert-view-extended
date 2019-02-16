@@ -3,6 +3,8 @@
 module.exports = (hermione, opts = {}) => {
     const globalStyles = opts.globalStyles || {};
     const globalExecute = opts.globalExecute || {};
+    const elementProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
+    const otherProps = ['animationDisable', 'customCSS'];
 
     hermione.on(hermione.events.NEW_BROWSER, (browser) => {
         const baseAssertView = browser.assertView.bind(browser);
@@ -11,27 +13,22 @@ module.exports = (hermione, opts = {}) => {
             options.excludeElements = normalize(options.excludeElements);
 
             // Merge global and local selectors without excluded selectors.
-            [
-                'ignoreElements',
-                'invisibleElements',
-                'hideElements',
-                'animationDisable',
-                'customCSS'
-            ]
-                .forEach((prop, i) => {
-                    options[prop] = merge(
-                        globalStyles[prop],
-                        i > 2 ? options[prop] : normalize(options[prop]),
-                        options.excludeElements
-                    );
-                });
+            [...elementProps, ...otherProps].forEach(prop => {
+                options[prop] = merge(
+                    globalStyles[prop],
+                    elementProps.includes(prop) ? normalize(options[prop]) : options[prop],
+                    options.excludeElements
+                );
+            });
 
             // Remove captured selector from all types of ignore.
-            Object.keys(options).forEach(prop => {
+            elementProps.forEach(prop => {
                 if (Array.isArray(options[prop])) {
                     options[prop] = options[prop].filter(selectorInside => selectorInside !== selector)
                 }
             });
+
+            options.animationDisable = options.animationDisable || false;
 
             let styleString = '';
 
