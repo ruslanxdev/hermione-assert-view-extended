@@ -13,11 +13,11 @@ npm i -D hermione-assert-view-extended
 Set options for the plugin in your hermione config:
 ```
 {
-    commands: {
-        before: function(name, selector, options) {
+    hooks: {
+        beforeEach: function(name, selector, options) {
             return this.browser.moveTo(0, 0);
         },
-        after: function(name, selector, options) {
+        afterEach: function(name, selector, options) {
             console.log(`Asserted view '${name}' for '${selector}' selector.`);
         }
     },
@@ -39,13 +39,13 @@ Set options for the plugin in your hermione config:
         `
     },
     globalExecute: {
-        before: [
+        beforeEach: [
             function(message) {
                 alert(message);
             },
             'Hello, world!'
         ],
-        after: function() {
+        afterEach: function() {
             alert('Bye bye!');
         }
     }
@@ -56,9 +56,9 @@ Set options for the plugin in your hermione config:
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `commands` | | Hermione commands which will be called before/after call assertView in `then()`. |
-| `commands.before` | | Hermione commands which will be called before call assertView and first inner execute. |
-| `commands.after` | | Hermione commands which will be called after call assertView and last inner execute. |
+| `hooks` | | Hermione commands which will be called before/after call assertView in `then()`. |
+| `hooks.beforeEach` | | Hermione commands which will be called before call assertView and first inner execute. |
+| `hooks.afterEach` | | Hermione commands which will be called after call assertView and last inner execute. |
 | `globalStyles` | | CSS injection appended in `<head>` before call assertView. It will be removed after call assertView. |
 | `globalStyles.animationDisable` | `false` | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
 | `globalStyles.ignoreElements` | | Elements will be covered with black rect. |
@@ -66,8 +66,8 @@ Set options for the plugin in your hermione config:
 | `globalStyles.hideElements` | | Elements will be hidden with `display: none`. |
 | `globalStyles.customCSS` | | Custom styles. |
 | `globalExecute` | | Scripts executed before/after call assertView in the inner execut with other manipulation. |
-| `globalExecute.before` | | JS function executed before call assertView. |
-| `globalExecute.after` | | JS function executed after call assertView. |
+| `globalExecute.beforeEach` | | JS function executed before call assertView. |
+| `globalExecute.afterEach` | | JS function executed after call assertView. |
 
 ## Licence
 
