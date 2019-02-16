@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (hermione, opts = {}) => {
-    const commands = opts.commands || {};
+    const hooks = opts.hooks || {};
     const globalStyles = opts.globalStyles || {};
     const globalExecute = opts.globalExecute || {};
     const elementProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
@@ -51,18 +51,18 @@ module.exports = (hermione, opts = {}) => {
 
             let beforeExecute, afterExecute;
 
-            if (globalExecute.before) {
-                globalExecute.before = normalizeExecute(globalExecute.before);
-                beforeExecute = globalExecute.before[0].bind(null, ...globalExecute.before.splice(1));
+            if (globalExecute.beforeEach) {
+                globalExecute.beforeEach = normalizeExecute(globalExecute.beforeEach);
+                beforeExecute = globalExecute.beforeEach[0].bind(null, ...globalExecute.beforeEach.splice(1));
             }
 
-            if (globalExecute.after) {
-                globalExecute.after = normalizeExecute(globalExecute.after);
-                afterExecute = globalExecute.after[0].bind(null, ...globalExecute.after.splice(1));
+            if (globalExecute.afterEach) {
+                globalExecute.afterEach = normalizeExecute(globalExecute.afterEach);
+                afterExecute = globalExecute.afterEach[0].bind(null, ...globalExecute.afterEach.splice(1));
             }
 
-            if (commands.before && typeof commands.before.call !== 'undefined') {
-                await browser.then(() => commands.before.call({ browser }, name, selector, options));
+            if (hooks.beforeEach && typeof hooks.beforeEach.call !== 'undefined') {
+                await browser.then(() => hooks.beforeEach.call({ browser }, name, selector, options));
             }
 
             await browser.execute(function(styleString, beforeExecute) {
@@ -95,8 +95,8 @@ module.exports = (hermione, opts = {}) => {
                 }
             }, afterExecute);
 
-            if (commands.after && typeof commands.after.call !== 'undefined') {
-                await browser.then(() => commands.after.call({ browser }, name, selector, options));
+            if (hooks.afterEach && typeof hooks.afterEach.call !== 'undefined') {
+                await browser.then(() => hooks.afterEach.call({ browser }, name, selector, options));
             }
         }, true);
     });
