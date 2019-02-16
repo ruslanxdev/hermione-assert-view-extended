@@ -13,6 +13,14 @@ npm i -D hermione-assert-view-extended
 Set options for the plugin in your hermione config:
 ```
 {
+    commands: {
+        before: function(name, selector, options) {
+            return this.browser.moveTo(0, 0);
+        },
+        after: function(name, selector, options) {
+            console.log(`Asserted view '${name}' for '${selector}' selector.`);
+        }
+    },
     globalStyles: {
         animationDisable: true,
         ignoreElements: [
@@ -48,6 +56,9 @@ Set options for the plugin in your hermione config:
 
 | Option | Default | Description |
 | --- | --- | --- |
+| `commands` | | Hermione commands which will be called before/after call assertView in `then()`. |
+| `commands.before` | | Hermione commands which will be called before call assertView and first inner execute. |
+| `commands.after` | | Hermione commands which will be called after call assertView and last inner execute. |
 | `globalStyles` | | CSS injection appended in `<head>` before call assertView. It will be removed after call assertView. |
 | `globalStyles.animationDisable` | `false` | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
 | `globalStyles.ignoreElements` | | Elements will be covered with black rect. |
