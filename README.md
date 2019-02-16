@@ -49,12 +49,12 @@ Set options for the plugin in your hermione config:
 | Option | Default | Description |
 | --- | --- | --- |
 | `globalStyles` | | CSS injection appended in `<head>` before call assertView. It will be removed after call assertView. |
-| `globalStyles.animationDisable` | | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
+| `globalStyles.animationDisable` | `false` | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
 | `globalStyles.ignoreElements` | | Elements will be covered with black rect. |
 | `globalStyles.invisibleElements` | | Elements will be hidden with `opacity: 0`. |
 | `globalStyles.hideElements` | | Elements will be hidden with `display: none`. |
 | `globalStyles.customCSS` | | Custom styles. |
-| `globalExecute` | | Scripts executed before or after call assertView. |
+| `globalExecute` | | Scripts executed before/after call assertView in the inner execut with other manipulation. |
 | `globalExecute.before` | | JS function executed before call assertView. |
 | `globalExecute.after` | | JS function executed after call assertView. |
 
