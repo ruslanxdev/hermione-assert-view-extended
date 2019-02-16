@@ -1,27 +1,63 @@
-# hermione-ignore
-Hermione plugin. Assert view with global ignored elements.
+# hermione-assert-view-extended
 
-`.hermione.conf.js`:
+Hermione plugin for extend assertView command. Inspired [hermione-ignore](https://github.com/deemidroll/hermione-ignore).
 
-```js
-module.exports = {
-    plugins: {
-        'hermione-ignore': {
-            globalIgnore: {
-                // Selectors will be covered with black rect.
-                ignoreElements: [
-                    '.classname1'
-                ],
-                // Selectors will be hidden with `display: none`.
-                hideElements: [
-                    '.classname2'
-                ],
-                // Selectors will be hidden with `opacity: 0`.
-                invisibleElements: [
-                    '.classname3'
-                ]
+## Install
+
+```
+npm i -D hermione-assert-view-extended
+```
+
+## Usage
+
+Set options for the plugin in your hermione config:
+```
+{
+    globalStyles: {
+        animationDisable: true,
+        ignoreElements: [
+            '.classname1'
+        ],
+        invisibleElements: [
+            '.classname3'
+        ],
+        hideElements: [
+            '.classname2'
+        ],
+        customCSS: `
+            body {
+                background-color: red;
             }
+        `
+    },
+    globalExecute: {
+        before: [
+            function(message) {
+                alert(message);
+            },
+            'Hello, world!'
+        ],
+        after: function() {
+            alert('Bye bye!');
         }
     }
-};
+}
 ```
+
+## Options
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `globalStyles` | | CSS injection appended in `<head>` before call assertView. It will be removed after call assertView. |
+| `globalStyles.animationDisable` | | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
+| `globalStyles.ignoreElements` | | Elements will be covered with black rect. |
+| `globalStyles.invisibleElements` | | Elements will be hidden with `opacity: 0`. |
+| `globalStyles.hideElements` | | Elements will be hidden with `display: none`. |
+| `globalStyles.customCSS` | | Custom styles. |
+| `globalExecute` | | Scripts executed before or after call assertView. |
+| `globalExecute.before` | | JS function executed before call assertView. |
+| `globalExecute.after` | | JS function executed after call assertView. |
+
+## Licence
+
+MIT
