@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports = (hermione, opts = {}) => {
+    const commands = opts.commands || {};
     const globalStyles = opts.globalStyles || {};
     const globalExecute = opts.globalExecute || {};
     const elementProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
@@ -60,6 +61,10 @@ module.exports = (hermione, opts = {}) => {
                 afterExecute = globalExecute.after[0].bind(null, ...globalExecute.after.splice(1));
             }
 
+            if (commands.before && typeof commands.before.call !== 'undefined') {
+                await browser.then(() => commands.before.call({ browser }, name, selector, options));
+            }
+
             await browser.execute(function(styleString, beforeExecute) {
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.createElement('style');
@@ -89,6 +94,10 @@ module.exports = (hermione, opts = {}) => {
                     afterExecute();
                 }
             }, afterExecute);
+
+            if (commands.after && typeof commands.after.call !== 'undefined') {
+                await browser.then(() => commands.after.call({ browser }, name, selector, options));
+            }
         }, true);
     });
 };
