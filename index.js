@@ -10,7 +10,7 @@ module.exports = (hermione, opts = {}) => {
     hermione.on(hermione.events.NEW_BROWSER, (browser) => {
         const baseAssertView = browser.assertView.bind(browser);
 
-        browser.addCommand('assertView', (name, selector, options = {}) => {
+        browser.addCommand('assertView', async (name, selector, options = {}) => {
             options.excludeElements = normalize(options.excludeElements);
 
             // Merge global and local selectors without excluded selectors.
