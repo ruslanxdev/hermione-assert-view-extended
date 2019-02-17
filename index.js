@@ -5,7 +5,7 @@ module.exports = (hermione, opts = {}) => {
     const globalStyles = opts.globalStyles || {};
     const globalExecute = opts.globalExecute || {};
     const elementProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
-    const otherProps = ['animationDisable', 'customCSS'];
+    const otherProps = ['animationDisabled', 'customCSS'];
 
     hermione.on(hermione.events.NEW_BROWSER, (browser) => {
         const baseAssertView = browser.assertView.bind(browser);
@@ -29,12 +29,12 @@ module.exports = (hermione, opts = {}) => {
                 }
             });
 
-            options.animationDisable = options.animationDisable || false;
+            options.animationDisabled = options.animationDisabled || false;
 
             let styleString = '';
 
-            if (options.animationDisable) {
-                styleString += getAnimationDisableStyles();
+            if (options.animationDisabled) {
+                styleString += getanimationDisabledStyles();
             }
 
             if (options.invisibleElements.length) {
@@ -111,7 +111,7 @@ function normalize(input) {
     return typeof input === 'string' ? [input] : input;
 }
 
-function getAnimationDisableStyles() {
+function getanimationDisabledStyles() {
     return `
         body, body *, body *:after, body *:before,
         body[class], body[class] *, body[class] *:after, body[class] *:before {
