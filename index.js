@@ -34,7 +34,7 @@ module.exports = (hermione, opts = {}) => {
             let styleString = '';
 
             if (options.animationDisabled) {
-                styleString += getanimationDisabledStyles();
+                styleString += getAnimationDisabledStyles();
             }
 
             if (options.invisibleElements.length) {
@@ -111,7 +111,7 @@ function normalize(input) {
     return typeof input === 'string' ? [input] : input;
 }
 
-function getanimationDisabledStyles() {
+function getAnimationDisabledStyles() {
     return `
         body, body *, body *:after, body *:before,
         body[class], body[class] *, body[class] *:after, body[class] *:before {
