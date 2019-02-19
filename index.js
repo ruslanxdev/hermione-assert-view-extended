@@ -66,6 +66,10 @@ module.exports = (hermione, opts = {}) => {
             }
 
             await browser.execute(function(styleString, beforeExecute) {
+                if (beforeExecute && typeof beforeExecute.call !== 'undefined') {
+                    beforeExecute();
+                }
+
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.createElement('style');
 
@@ -76,8 +80,11 @@ module.exports = (hermione, opts = {}) => {
                 // Add styles before screenshot capturing.
                 head.appendChild(style);
 
-                if (beforeExecute && typeof beforeExecute.call !== 'undefined') {
-                    beforeExecute();
+                // Force repaint page
+                if (window.getComputedStyle) {
+                    window.getComputedStyle(document.body, null).getPropertyValue('height');
+                } else {
+                    document.body.currentStyle.height;
                 }
             }, styleString, beforeExecute);
 
