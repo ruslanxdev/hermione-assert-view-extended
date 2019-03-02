@@ -11,7 +11,7 @@ npm i -D hermione-assert-view-extended
 ## Usage
 
 Set options for the plugin in your hermione config:
-```
+```js
 {
     hooks: {
         beforeEach: function(name, selector, options) {
@@ -23,12 +23,16 @@ Set options for the plugin in your hermione config:
     },
     globalStyles: {
         animationDisabled: true,
+        redraw: true,
+        // Elements will be covered with black rect.
         ignoreElements: [
             '.classname1'
         ],
+        // Elements will be hidden with `opacity: 0`.
         invisibleElements: [
             '.classname3'
         ],
+        // Elements will be hidden with `display: none`.
         hideElements: [
             '.classname2'
         ],
@@ -37,17 +41,6 @@ Set options for the plugin in your hermione config:
                 background-color: red;
             }
         `
-    },
-    globalExecute: {
-        beforeEach: [
-            function(message) {
-                alert(message);
-            },
-            'Hello, world!'
-        ],
-        afterEach: function() {
-            alert('Bye bye!');
-        }
     }
 }
 ```
@@ -61,13 +54,11 @@ Set options for the plugin in your hermione config:
 | `hooks.afterEach` | | Hermione commands which will be called after call assertView and last inner execute. |
 | `globalStyles` | | CSS injection appended in `<head>` before call assertView. It will be removed after call assertView. |
 | `globalStyles.animationDisabled` | `false` | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
+| `globalStyles.redraw` | `false` | Bowser redraw page after apply styles. |
 | `globalStyles.ignoreElements` | | Elements will be covered with black rect. |
 | `globalStyles.invisibleElements` | | Elements will be hidden with `opacity: 0`. |
 | `globalStyles.hideElements` | | Elements will be hidden with `display: none`. |
 | `globalStyles.customCSS` | | Custom styles. |
-| `globalExecute` | | Scripts executed before/after call assertView in the inner execut with other manipulation. |
-| `globalExecute.beforeEach` | | JS function executed before call assertView. |
-| `globalExecute.afterEach` | | JS function executed after call assertView. |
 
 ## Licence
 
