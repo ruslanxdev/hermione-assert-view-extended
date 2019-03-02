@@ -3,7 +3,6 @@
 module.exports = (hermione, opts = {}) => {
     const hooks = opts.hooks || {};
     const globalStyles = opts.globalStyles || {};
-    const globalExecute = opts.globalExecute || {};
     const elementProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
     const otherProps = ['animationDisabled', 'customCSS'];
 
@@ -14,12 +13,15 @@ module.exports = (hermione, opts = {}) => {
             options.excludeElements = normalize(options.excludeElements);
 
             // Merge global and local selectors without excluded selectors.
-            [...elementProps, ...otherProps].forEach(prop => {
+            elementProps.forEach(prop => {
                 options[prop] = merge(
                     globalStyles[prop],
-                    elementProps.includes(prop) ? normalize(options[prop]) : options[prop],
+                    normalize(options[prop]),
                     options.excludeElements
                 );
+            });
+            otherProps.forEach(prop => {
+                options[prop] = options[prop] !== undefined ? options[prop] : globalStyles[prop] || false;
             });
 
             // Remove captured selector from all types of ignore.
@@ -28,8 +30,6 @@ module.exports = (hermione, opts = {}) => {
                     options[prop] = options[prop].filter(selectorInside => selectorInside !== selector)
                 }
             });
-
-            options.animationDisabled = options.animationDisabled || false;
 
             let styleString = '';
 
@@ -49,27 +49,11 @@ module.exports = (hermione, opts = {}) => {
                 styleString += options.customCSS;
             }
 
-            let beforeExecute, afterExecute;
-
-            if (globalExecute.beforeEach) {
-                globalExecute.beforeEach = normalizeExecute(globalExecute.beforeEach);
-                beforeExecute = globalExecute.beforeEach[0].bind(null, ...globalExecute.beforeEach.splice(1));
-            }
-
-            if (globalExecute.afterEach) {
-                globalExecute.afterEach = normalizeExecute(globalExecute.afterEach);
-                afterExecute = globalExecute.afterEach[0].bind(null, ...globalExecute.afterEach.splice(1));
-            }
-
             if (hooks.beforeEach && typeof hooks.beforeEach.call !== 'undefined') {
                 await browser.then(() => hooks.beforeEach.call({ browser }, name, selector, options));
             }
 
-            await browser.execute(function(styleString, beforeExecute) {
-                if (beforeExecute && typeof beforeExecute.call !== 'undefined') {
-                    beforeExecute();
-                }
-
+            await browser.execute(function(styleString) {
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.createElement('style');
 
@@ -86,21 +70,17 @@ module.exports = (hermione, opts = {}) => {
                 } else {
                     document.body.currentStyle.height;
                 }
-            }, styleString, beforeExecute);
+            }, styleString);
 
             await baseAssertView(name, selector, options);
 
-            await browser.execute(function(afterExecute) {
+            await browser.execute(function() {
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.getElementById('hermione-assert-view-extended');
 
                 // Remove styles after screenshot capturing.
                 head.removeChild(style);
-
-                if (afterExecute && typeof afterExecute.call !== 'undefined') {
-                    afterExecute();
-                }
-            }, afterExecute);
+            });
 
             if (hooks.afterEach && typeof hooks.afterEach.call !== 'undefined') {
                 await browser.then(() => hooks.afterEach.call({ browser }, name, selector, options));
@@ -138,6 +118,3 @@ function getAnimationDisabledStyles() {
     `;
 }
 
-function normalizeExecute(value) {
-    return [].concat(value);
-}
