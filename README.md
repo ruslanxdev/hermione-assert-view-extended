@@ -11,7 +11,7 @@ npm i -D hermione-assert-view-extended
 ## Usage
 
 Set options for the plugin in your hermione config:
-```
+```js
 {
     hooks: {
         beforeEach: function(name, selector, options) {
@@ -23,12 +23,15 @@ Set options for the plugin in your hermione config:
     },
     globalStyles: {
         animationDisabled: true,
+        // Elements will be covered with black rect.
         ignoreElements: [
             '.classname1'
         ],
+        // Elements will be hidden with `opacity: 0`.
         invisibleElements: [
             '.classname3'
         ],
+        // Elements will be hidden with `display: none`.
         hideElements: [
             '.classname2'
         ],
