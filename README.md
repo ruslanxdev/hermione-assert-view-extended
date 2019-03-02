@@ -23,6 +23,7 @@ Set options for the plugin in your hermione config:
     },
     globalStyles: {
         animationDisabled: true,
+        redraw: true,
         // Elements will be covered with black rect.
         ignoreElements: [
             '.classname1'
@@ -53,6 +54,7 @@ Set options for the plugin in your hermione config:
 | `hooks.afterEach` | | Hermione commands which will be called after call assertView and last inner execute. |
 | `globalStyles` | | CSS injection appended in `<head>` before call assertView. It will be removed after call assertView. |
 | `globalStyles.animationDisabled` | `false` | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
+| `globalStyles.redraw` | `false` | Bowser redraw page after apply styles. |
 | `globalStyles.ignoreElements` | | Elements will be covered with black rect. |
 | `globalStyles.invisibleElements` | | Elements will be hidden with `opacity: 0`. |
 | `globalStyles.hideElements` | | Elements will be hidden with `display: none`. |
