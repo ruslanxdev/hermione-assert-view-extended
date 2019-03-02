@@ -40,17 +40,6 @@ Set options for the plugin in your hermione config:
                 background-color: red;
             }
         `
-    },
-    globalExecute: {
-        beforeEach: [
-            function(message) {
-                alert(message);
-            },
-            'Hello, world!'
-        ],
-        afterEach: function() {
-            alert('Bye bye!');
-        }
     }
 }
 ```
@@ -68,9 +57,6 @@ Set options for the plugin in your hermione config:
 | `globalStyles.invisibleElements` | | Elements will be hidden with `opacity: 0`. |
 | `globalStyles.hideElements` | | Elements will be hidden with `display: none`. |
 | `globalStyles.customCSS` | | Custom styles. |
-| `globalExecute` | | Scripts executed before/after call assertView in the inner execut with other manipulation. |
-| `globalExecute.beforeEach` | | JS function executed before call assertView. |
-| `globalExecute.afterEach` | | JS function executed after call assertView. |
 
 ## Licence
 
