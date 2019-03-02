@@ -4,7 +4,7 @@ module.exports = (hermione, opts = {}) => {
     const hooks = opts.hooks || {};
     const globalStyles = opts.globalStyles || {};
     const elementProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
-    const otherProps = ['animationDisabled', 'customCSS'];
+    const otherProps = ['animationDisabled', 'customCSS', 'redraw'];
 
     hermione.on(hermione.events.NEW_BROWSER, (browser) => {
         const baseAssertView = browser.assertView.bind(browser);
@@ -33,6 +33,10 @@ module.exports = (hermione, opts = {}) => {
 
             let styleString = '';
 
+            if (options.redraw) {
+                styleString += getPreRedrawStyles();
+            }
+
             if (options.animationDisabled) {
                 styleString += getAnimationDisabledStyles();
             }
@@ -53,7 +57,7 @@ module.exports = (hermione, opts = {}) => {
                 await browser.then(() => hooks.beforeEach.call({ browser }, name, selector, options));
             }
 
-            await browser.execute(function(styleString) {
+            await browser.execute(function(styleString, redraw) {
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.createElement('style');
 
@@ -64,13 +68,19 @@ module.exports = (hermione, opts = {}) => {
                 // Add styles before screenshot capturing.
                 head.appendChild(style);
 
-                // Force repaint page
-                if (window.getComputedStyle) {
-                    window.getComputedStyle(document.body, null).getPropertyValue('height');
-                } else {
-                    document.body.currentStyle.height;
+                // Force redraw page
+                if (redraw) {
+                    var oldBodyStylesTransform = document.body.style.transform;
+                    var oldBodyStylesDisplay = document.body.style.display;
+
+                    document.body.style.transform = 'translateZ(0)';
+                    document.body.style.display = 'none';
+                    // No need to store this anywhere, the reference is enough
+                    document.body.offsetHeight;
+                    document.body.style.display = oldBodyStylesDisplay;
+                    document.body.style.transform = oldBodyStylesTransform;
                 }
-            }, styleString);
+            }, styleString, options.redraw);
 
             await baseAssertView(name, selector, options);
 
@@ -118,3 +128,10 @@ function getAnimationDisabledStyles() {
     `;
 }
 
+function getPreRedrawStyles() {
+    return `
+        body {
+            will-change: transform;
+        }
+    `;
+}
