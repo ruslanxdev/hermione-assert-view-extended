@@ -55,6 +55,8 @@ Set options for the plugin in your hermione config:
 | `globalStyles` | | CSS injection appended in `<head>` before call assertView. It will be removed after call assertView. |
 | `globalStyles.animationDisabled` | `false` | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
 | `globalStyles.redraw` | `false` | Bowser redraw page after apply styles.<br><ul><li>`'soft'`, `'medium'` — only repaint without reflow;</li><li>`'hard'` — reflow and repaint.</li></ul> |
+| `globalStyles.redrawElements` | `['body']` | Elements will be redrawed. |
+| `globalStyles.redrawTimeout` | | Timeout after redraw elements. |
 | `globalStyles.ignoreElements` | | Elements will be covered with black rect. |
 | `globalStyles.invisibleElements` | | Elements will be hidden with `opacity: 0`. |
 | `globalStyles.hideElements` | | Elements will be hidden with `display: none`. |
