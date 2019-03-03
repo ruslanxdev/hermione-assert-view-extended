@@ -33,6 +33,8 @@ module.exports = (hermione, opts = {}) => {
 
             let styleString = '';
 
+            options.redraw = options.redraw === true ? 'soft' : options.redraw;
+
             if (options.redraw) {
                 styleString += getPreRedrawStyles();
             }
@@ -69,28 +71,43 @@ module.exports = (hermione, opts = {}) => {
                 head.appendChild(style);
 
                 // Force redraw page
-                if (redraw) {
-                    var oldBodyStylesTransform = document.body.style.transform;
+                if (redraw === 'soft') {
+                    // Repaint
+                    window.hermione_oldBodyStylesTransform = document.body.style.transform;
+                    document.body.style.transform = 'translateZ(0)';
+                } else if (redraw === 'medium') {
+                    // Repaint
+                    var oldBodyStylesVisibility = document.body.style.visibility;
+
+                    document.body.style.visibility = 'hidden';
+
+                    setTimeout(function() {
+                        document.body.style.visibility = oldBodyStylesVisibility;
+                    }, 0);
+                } else if (redraw === 'hard') {
+                    // Reflow and repaint
                     var oldBodyStylesDisplay = document.body.style.display;
 
-                    document.body.style.transform = 'translateZ(0)';
                     document.body.style.display = 'none';
                     // No need to store this anywhere, the reference is enough
                     document.body.offsetHeight;
                     document.body.style.display = oldBodyStylesDisplay;
-                    document.body.style.transform = oldBodyStylesTransform;
                 }
             }, styleString, options.redraw);
 
             await baseAssertView(name, selector, options);
 
-            await browser.execute(function() {
+            await browser.execute(function(redraw) {
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.getElementById('hermione-assert-view-extended');
 
                 // Remove styles after screenshot capturing.
                 head.removeChild(style);
-            });
+
+                if (redraw === 'soft') {
+                    document.body.style.transform = window.hermione_oldBodyStylesTransform;
+                }
+            }, options.redraw);
 
             if (hooks.afterEach && typeof hooks.afterEach.call !== 'undefined') {
                 await browser.then(() => hooks.afterEach.call({ browser }, name, selector, options));
