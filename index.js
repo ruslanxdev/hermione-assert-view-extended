@@ -3,8 +3,9 @@
 module.exports = (hermione, opts = {}) => {
     const hooks = opts.hooks || {};
     const globalStyles = opts.globalStyles || {};
-    const elementProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
-    const otherProps = ['animationDisabled', 'customCSS', 'redraw'];
+    const ignoreProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
+    const redrawProps = ['redrawElements'];
+    const otherProps = ['animationDisabled', 'customCSS', 'redraw', 'redrawTimeout'];
 
     hermione.on(hermione.events.NEW_BROWSER, (browser) => {
         const baseAssertView = browser.assertView.bind(browser);
@@ -13,30 +14,38 @@ module.exports = (hermione, opts = {}) => {
             options.excludeElements = normalize(options.excludeElements);
 
             // Merge global and local selectors without excluded selectors.
-            elementProps.forEach(prop => {
+            ignoreProps.forEach(prop => {
                 options[prop] = merge(
                     globalStyles[prop],
                     normalize(options[prop]),
                     options.excludeElements
                 );
             });
-            otherProps.forEach(prop => {
-                options[prop] = options[prop] !== undefined ? options[prop] : globalStyles[prop] || false;
+
+            // Merge global and local selectors
+            redrawProps.forEach(prop => {
+                options[prop] = merge(globalStyles[prop], normalize(options[prop]));
             });
 
             // Remove captured selector from all types of ignore.
-            elementProps.forEach(prop => {
+            ignoreProps.forEach(prop => {
                 if (Array.isArray(options[prop])) {
                     options[prop] = options[prop].filter(selectorInside => selectorInside !== selector)
                 }
             });
 
+            // Merge other props
+            otherProps.forEach(prop => {
+                options[prop] = options[prop] !== undefined ? options[prop] : globalStyles[prop] || false;
+            });
+
             let styleString = '';
 
             options.redraw = options.redraw === true ? 'soft' : options.redraw;
+            options.redrawElements = !options.redrawElements.length ? ['body'] : options.redrawElements;
 
             if (options.redraw) {
-                styleString += getPreRedrawStyles();
+                styleString += options.redrawElements.join(',') + '{ will-change: transform; }';
             }
 
             if (options.animationDisabled) {
@@ -59,55 +68,77 @@ module.exports = (hermione, opts = {}) => {
                 await browser.then(() => hooks.beforeEach.call({ browser }, name, selector, options));
             }
 
-            await browser.execute(function(styleString, redraw) {
+            await browser.execute(function(styleString, redraw, redrawElements) {
+                var PREFIX = 'hermione-assert-view-extended';
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.createElement('style');
 
                 style.type = 'text/css';
-                style.id = 'hermione-assert-view-extended';
+                style.id = PREFIX + '-style';
                 style.innerText = styleString;
 
                 // Add styles before screenshot capturing.
                 head.appendChild(style);
 
-                // Force redraw page
-                if (redraw === 'soft') {
-                    // Repaint
-                    window.hermione_oldBodyStylesTransform = document.body.style.transform;
-                    document.body.style.transform = 'translateZ(0)';
-                } else if (redraw === 'medium') {
-                    // Repaint
-                    var oldBodyStylesVisibility = document.body.style.visibility;
+                // Force redraw elements
+                if (redraw && redrawElements && redrawElements.length) {
+                    redrawElements.forEach(function(selector) {
+                        var element = document.querySelector(selector);
 
-                    document.body.style.visibility = 'hidden';
+                        if (element) {
+                            if (redraw === 'soft') {
+                                // Repaint
+                                window[PREFIX + '-styles'] = window[PREFIX + '-styles'] || {};
+                                window[PREFIX + '-styles'][selector] = window[PREFIX + '-styles'][selector] || {};
+                                window[PREFIX + '-styles'][selector].transform = element.style.transform;
+                                element.style.transform = 'translateZ(0)';
+                            } else if (redraw === 'medium') {
+                                // Repaint
+                                var oldStylesVisibility = element.style.visibility;
 
-                    setTimeout(function() {
-                        document.body.style.visibility = oldBodyStylesVisibility;
-                    }, 0);
-                } else if (redraw === 'hard') {
-                    // Reflow and repaint
-                    var oldBodyStylesDisplay = document.body.style.display;
+                                element.style.visibility = 'hidden';
 
-                    document.body.style.display = 'none';
-                    // No need to store this anywhere, the reference is enough
-                    document.body.offsetHeight;
-                    document.body.style.display = oldBodyStylesDisplay;
+                                setTimeout(function() {
+                                    element.style.visibility = oldStylesVisibility;
+                                }, 0);
+                            } else if (redraw === 'hard') {
+                                // Reflow and repaint
+                                var oldStylesDisplay = element.style.display;
+
+                                element.style.display = 'none';
+                                // No need to store this anywhere, the reference is enough
+                                element.offsetHeight;
+                                element.style.display = oldStylesDisplay;
+                            }
+                        }
+                    });
                 }
-            }, styleString, options.redraw);
+            }, styleString, options.redraw, options.redrawElements);
+
+            if (options.redraw && options.redrawTimeout) {
+                await browser.pause(options.redrawTimeout);
+            }
 
             await baseAssertView(name, selector, options);
 
-            await browser.execute(function(redraw) {
+            await browser.execute(function(redraw, redrawElements) {
+                var PREFIX = 'hermione-assert-view-extended';
                 var head = document.head || document.getElementsByTagName('head')[0];
-                var style = document.getElementById('hermione-assert-view-extended');
+                var style = document.getElementById(PREFIX + '-style');
 
                 // Remove styles after screenshot capturing.
                 head.removeChild(style);
 
                 if (redraw === 'soft') {
-                    document.body.style.transform = window.hermione_oldBodyStylesTransform;
+                    redrawElements.forEach(function(selector) {
+                        var element = document.querySelector(selector);
+
+                        if (element) {
+                            element.style.transform = window[PREFIX + '-styles'][selector].transform;
+                        }
+                    });
                 }
-            }, options.redraw);
+            }, options.redraw, options.redrawElements);
 
             if (hooks.afterEach && typeof hooks.afterEach.call !== 'undefined') {
                 await browser.then(() => hooks.afterEach.call({ browser }, name, selector, options));
@@ -141,14 +172,6 @@ function getAnimationDisabledStyles() {
             -moz-transition-delay: 0s !important;
             -ms-transition-delay: 0s !important;
             transition-delay: 0s !important;
-        }
-    `;
-}
-
-function getPreRedrawStyles() {
-    return `
-        body {
-            will-change: transform;
         }
     `;
 }
