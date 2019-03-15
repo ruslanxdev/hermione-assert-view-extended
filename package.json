@@ -16,6 +16,9 @@
     "assert-view"
   ],
   "author": "Ruslan Khusnetdinov <ruslankhh@gmail.com>",
+  "contributors": [
+    "Dmitry Akimov <deemidroll@gmail.com>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ruslankhh/hermione-assert-view-extended/issues"
