@@ -5,7 +5,8 @@ module.exports = (hermione, opts = {}) => {
     const globalStyles = opts.globalStyles || {};
     const ignoreProps = ['ignoreElements', 'invisibleElements', 'hideElements'];
     const redrawProps = ['redrawElements'];
-    const otherProps = ['animationDisabled', 'customCSS', 'redraw', 'redrawTimeout'];
+    const otherProps = ['animationDisabled', 'customCSS', 'redraw', 'redrawMode', 'redrawTimeout'];
+    const redrawModeDefault = 'medium';
 
     hermione.on(hermione.events.NEW_BROWSER, (browser) => {
         const baseAssertView = browser.assertView.bind(browser);
@@ -41,10 +42,11 @@ module.exports = (hermione, opts = {}) => {
 
             let styleString = '';
 
-            options.redraw = options.redraw === true ? 'soft' : options.redraw;
-            options.redrawElements = !options.redrawElements.length ? ['body'] : options.redrawElements;
+            options.redrawMode = options.redrawMode || redrawModeDefault;
+            options.redrawElements = options.redraw && !options.redrawElements.length ?
+                ['body'] : options.redrawElements;
 
-            if (options.redraw) {
+            if (options.redraw || (options.redrawElements && options.redrawElements.length)) {
                 styleString += options.redrawElements.join(',') + '{ will-change: transform; }';
             }
 
@@ -68,7 +70,7 @@ module.exports = (hermione, opts = {}) => {
                 await browser.then(() => hooks.beforeEach.call({ browser }, name, selector, options));
             }
 
-            await browser.execute(function(styleString, redraw, redrawElements) {
+            await browser.execute(function(styleString, redraw, redrawMode, redrawElements) {
                 var PREFIX = 'hermione-assert-view-extended';
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.createElement('style');
@@ -81,39 +83,47 @@ module.exports = (hermione, opts = {}) => {
                 head.appendChild(style);
 
                 // Force redraw elements
-                if (redraw && redrawElements && redrawElements.length) {
+                if (redraw || (redrawElements && redrawElements.length)) {
                     redrawElements.forEach(function(selector) {
                         var element = document.querySelector(selector);
 
                         if (element) {
-                            if (redraw === 'soft') {
+                            switch (redrawMode) {
                                 // Repaint
-                                window[PREFIX + '-styles'] = window[PREFIX + '-styles'] || {};
-                                window[PREFIX + '-styles'][selector] = window[PREFIX + '-styles'][selector] || {};
-                                window[PREFIX + '-styles'][selector].transform = element.style.transform;
-                                element.style.transform = 'translateZ(0)';
-                            } else if (redraw === 'medium') {
-                                // Repaint
-                                var oldStylesVisibility = element.style.visibility;
+                                case 'soft':
+                                    window[PREFIX + '-styles'] = window[PREFIX + '-styles'] || {};
+                                    window[PREFIX + '-styles'][selector] = window[PREFIX + '-styles'][selector] || {};
+                                    window[PREFIX + '-styles'][selector].transform = element.style.transform;
+                                    element.style.transform = 'translateZ(0)';
 
-                                element.style.visibility = 'hidden';
+                                    break;
 
-                                setTimeout(function() {
-                                    element.style.visibility = oldStylesVisibility;
-                                }, 0);
-                            } else if (redraw === 'hard') {
                                 // Reflow and repaint
-                                var oldStylesDisplay = element.style.display;
+                                case 'medium':
+                                    var oldStylesOpacity = element.style.opacity;
 
-                                element.style.display = 'none';
-                                // No need to store this anywhere, the reference is enough
-                                element.offsetHeight;
-                                element.style.display = oldStylesDisplay;
+                                    element.style.opacity = 0;
+                                    // No need to store this anywhere, the reference is enough
+                                    element.offsetHeight;
+                                    element.style.opacity = oldStylesOpacity;
+
+                                    break;
+
+                                // Reflow and repaint
+                                case 'hard':
+                                    var oldStylesDisplay = element.style.display;
+
+                                    element.style.display = 'none';
+                                    // No need to store this anywhere, the reference is enough
+                                    element.offsetHeight;
+                                    element.style.display = oldStylesDisplay;
+
+                                    break;
                             }
                         }
                     });
                 }
-            }, styleString, options.redraw, options.redrawElements);
+            }, styleString, options.redraw, options.redrawMode, options.redrawElements);
 
             if (options.redraw && options.redrawTimeout) {
                 await browser.pause(options.redrawTimeout);
@@ -121,7 +131,7 @@ module.exports = (hermione, opts = {}) => {
 
             await baseAssertView(name, selector, options);
 
-            await browser.execute(function(redraw, redrawElements) {
+            await browser.execute(function(redraw, redrawMode, redrawElements) {
                 var PREFIX = 'hermione-assert-view-extended';
                 var head = document.head || document.getElementsByTagName('head')[0];
                 var style = document.getElementById(PREFIX + '-style');
@@ -129,7 +139,7 @@ module.exports = (hermione, opts = {}) => {
                 // Remove styles after screenshot capturing.
                 head.removeChild(style);
 
-                if (redraw === 'soft') {
+                if ((redraw || (redrawElements && redrawElements.length)) && redrawMode === 'soft') {
                     redrawElements.forEach(function(selector) {
                         var element = document.querySelector(selector);
 
@@ -138,7 +148,7 @@ module.exports = (hermione, opts = {}) => {
                         }
                     });
                 }
-            }, options.redraw, options.redrawElements);
+            }, options.redraw, options.redrawMode, options.redrawElements);
 
             if (hooks.afterEach && typeof hooks.afterEach.call !== 'undefined') {
                 await browser.then(() => hooks.afterEach.call({ browser }, name, selector, options));
