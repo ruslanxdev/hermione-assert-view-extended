@@ -9,9 +9,7 @@ module.exports = (hermione, opts = {}) => {
     const redrawModeDefault = 'medium';
 
     hermione.on(hermione.events.NEW_BROWSER, (browser) => {
-        const baseAssertView = browser.assertView.bind(browser);
-
-        browser.addCommand('assertView', async (name, selector, options = {}) => {
+        browser.overwriteCommand('assertView', async (baseAssertView, name, selector, options = {}) => {
             options.excludeElements = normalize(options.excludeElements);
 
             // Merge global and local selectors without excluded selectors.
@@ -153,7 +151,7 @@ module.exports = (hermione, opts = {}) => {
             if (hooks.afterEach && typeof hooks.afterEach.call !== 'undefined') {
                 await browser.then(() => hooks.afterEach.call({ browser }, name, selector, options));
             }
-        }, true);
+        });
     });
 };
 
