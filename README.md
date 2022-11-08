@@ -54,8 +54,8 @@ Set options for the plugin in your hermione config:
 | `hooks.afterEach` | | Hermione commands which will be called after call assertView and last inner execute. |
 | `globalStyles` | | CSS injection appended in `<head>` before call assertView. It will be removed after call assertView. |
 | `globalStyles.animationDisabled` | `false` | Disable CSS animation (`transition-duration: 0s`, `animation-duration: 0s`, etc.). |
-| `globalStyles.redraw` | `false` | Bowser redraw page after apply styles. It will be `true`, if you set `redrawElements`. |
-| `globalStyles.redrawMode` | `'medium'` | Bowser redraw page after apply styles.<br><ul><li>`'soft'` — only repaint without reflow with `transform: translateZ(0)`;</li><li>`'medium'` — reflow and repaint with `opacity: 0`;</li><li>`'hard'` — reflow and repaint with `display: none`.</li></ul> |
+| `globalStyles.redraw` | `false` | Browser redraw page after apply styles. It will be `true`, if you set `redrawElements`. |
+| `globalStyles.redrawMode` | `'medium'` | Browser redraw page after apply styles.<br><ul><li>`'soft'` — only repaint without reflow with `transform: translateZ(0)`;</li><li>`'medium'` — reflow and repaint with `opacity: 0`;</li><li>`'hard'` — reflow and repaint with `display: none`.</li></ul> |
 | `globalStyles.redrawElements` | `['body']` | Elements will be redrawed. |
 | `globalStyles.redrawTimeout` | | Timeout after redraw elements. |
 | `globalStyles.ignoreElements` | | Elements will be covered with black rect. |
